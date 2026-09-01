@@ -66,6 +66,7 @@ Los detalles de CUDA, Gemini y Jinja2 no deben filtrarse al orquestador.
 ## Configuración inicial
 
 ```env
+GEMINI_API_KEY=
 WHISPER_MODEL=small
 WHISPER_LANGUAGE=es
 WHISPER_GPU_COMPUTE_TYPE=int8_float16
@@ -77,7 +78,9 @@ USE_PRO_WHEN_AVAILABLE=false
 DELETE_SOURCE_VIDEO_AFTER_SUCCESS=false
 ```
 
-Los nombres actuales de modelos Gemini se configuran fuera del código.
+La aplicación carga estas variables desde `.env` con `pydantic-settings`. Los nombres actuales de modelos Gemini se configuran fuera del código.
+
+`CONTEXT7_API_KEY` no depende de la aplicación Python: debe existir en el entorno del proceso que inicia OpenCode. `opencode.json` la referencia mediante `{env:CONTEXT7_API_KEY}`. Ninguna clave real se guarda en archivos versionados.
 
 ## Reglas de implementación
 
