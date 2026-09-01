@@ -1,422 +1,139 @@
-# Academic Vault Processor V1 - Final Implementation Plan
-
-## Objective
-
-Primary workflow:
-
-```text
-Video
-↓
-Whisper
-↓
-Transcript
-↓
-Ollama
-↓
-Concept Extraction
-↓
-Knowledge Graph
-↓
-Obsidian Vault
-```
-
-The system must transform raw academic recordings into structured and linked knowledge stored inside an Obsidian Vault.
-
----
-
-# Repository Structure
-
-```text
-academic-vault-processor/
-
-├── README.md
-├── ARCHITECTURE.md
-├── APRD.md
-├── IMPLEMENTATION_BLUEPRINT.md
-├── GENERATION_PROMPT.md
-
-├── pyproject.toml
-├── .env.example
-├── .gitignore
-├── .pre-commit-config.yaml
-
-├── docs/
-│   ├── AGENTS.md
-│   ├── PROJECT_SPEC.md
-│   └── IMPLEMENTATION_PLAN_V1.md
-
-├── .github/
-│   └── workflows/
-│       └── ci.yml
-
-├── src/
-│   ├── __init__.py
-│   ├── main.py
-│   ├── config.py
-│
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── enums.py
-│   │   ├── processed_content.py
-│   │   ├── transcript.py
-│   │   ├── concept.py
-│   │   ├── relation.py
-│   │   ├── note.py
-│   │   └── academic_analysis.py
-│
-│   ├── protocols/
-│   │   ├── __init__.py
-│   │   └── processor.py
-│
-│   ├── registry/
-│   │   ├── __init__.py
-│   │   └── processor_registry.py
-│
-│   ├── processors/
-│   │   ├── __init__.py
-│   │   ├── base.py
-│   │   ├── media_processor.py
-│   │   ├── pdf_processor.py
-│   │   ├── text_processor.py
-│   │   └── excel_processor.py
-│
-│   ├── services/
-│   │   ├── __init__.py
-│   │   ├── whisper_service.py
-│   │   ├── ollama_service.py
-│   │   └── deduplication_service.py
-│
-│   ├── builders/
-│   │   ├── __init__.py
-│   │   ├── markdown_builder.py
-│   │   └── vault_builder.py
-│
-│   ├── pipelines/
-│   │   ├── __init__.py
-│   │   └── ingestion_pipeline.py
-│
-│   ├── templates/
-│   │   ├── prompts/
-│   │   │   └── academic_agent.md
-│   │   └── notes/
-│   │       ├── clase.tpl
-│   │       ├── concepto.tpl
-│   │       └── materia.tpl
-│
-│   └── utils/
-│       ├── __init__.py
-│       ├── hashing.py
-│       ├── similarity.py
-│       ├── frontmatter.py
-│       └── vault_initializer.py
-│
-├── tests/
-│   ├── conftest.py
-│   ├── models/
-│   ├── processors/
-│   ├── services/
-│   ├── builders/
-│   ├── pipelines/
-│   └── integration/
-│
-└── 99_Adjuntos/
-    └── .vault_index.json
-```
+# Academic Vault Processor V1 - Plan de implementación
 
----
+## Objetivo
 
-# Milestone 1
+Entregar primero un flujo vertical para una sesión MP4 real. Cada hito debe dejar una capacidad ejecutable y probada; los formatos no relacionados con sesiones quedan pospuestos.
 
-## Goal
+## Hito 1: entorno y esqueleto
 
-Project foundation.
+Entregables:
 
-## Deliverables
+- `pyproject.toml` para Python 3.12 y uv.
+- Estructura `src/academic_vault/` y `tests/`.
+- Ruff, mypy estricto, pytest y cobertura.
+- Configuración por variables de entorno.
+- CLI Typer con `process`, `resume` y `status`.
 
-- pyproject.toml
-- .gitignore
-- .env.example
-- CI pipeline
-- pre-commit hooks
-- project structure
+Finalizado cuando `uv sync`, lint, tipos y pruebas funcionan.
 
-## Definition of Done
+## Hito 2: contratos y trabajo persistente
 
-- uv sync works
-- pytest runs
-- ruff passes
-- mypy passes
+Entregables:
 
----
+- `SessionInput`, `JobManifest` y estados.
+- `NormalizedTranscript`, `SessionChunk` y material docente.
+- Contratos parciales y finales de `AcademicAnalysis`.
+- Validación de `session.yaml`.
+- Persistencia atómica del manifiesto.
 
-# Milestone 2
+Finalizado cuando un trabajo puede crearse, validarse y reabrirse.
 
-## Goal
+## Hito 3: preparación de audio
 
-Domain model layer.
+Entregables:
 
-## Deliverables
+- Integración con FFmpeg.
+- Conversión de MP4 a mono, 16 kHz.
+- Normalización de volumen.
+- Manejo de rutas con espacios y errores de FFmpeg.
 
-- ProcessedContent
-- Transcript
-- Concept
-- Relation
-- Note
-- AcademicAnalysis
+Finalizado cuando una muestra real produce audio transcribible sin alterar el video.
 
-## Definition of Done
+## Hito 4: Faster-Whisper
 
-- Pydantic models
-- Validation tests
-- Type hints
-- 70% coverage
+Entregables:
 
----
+- Transcriptor `small` en español.
+- CUDA `int8_float16` como primera opción.
+- Fallback automático a CPU `int8`.
+- VAD.
+- JSON crudo, JSON normalizado, TXT y VTT.
+- Progreso y estado reanudable.
 
-# Milestone 3
+Finalizado cuando una muestra de 20 a 30 minutos se transcribe en GPU y también mediante el fallback simulado.
 
-## Goal
+## Hito 5: material docente y bloques
 
-Processor protocol and registry.
+Entregables:
 
-## Deliverables
+- Extracción de texto de PDF con PyMuPDF.
+- Asociación aproximada de páginas con bloques.
+- Segmentación de 10 a 15 minutos.
+- Preservación de orden y segmentos fuente.
+- Contexto limitado entre bloques consecutivos.
 
-- Processor Protocol
-- ProcessorRegistry
+Finalizado cuando una transcripción larga se divide sin pérdida de texto y conserva contexto de diapositivas.
 
-Supported types:
+## Hito 6: analizador Gemini
 
-- mp4
-- mov
-- wav
-- mp3
-- pdf
-- txt
-- md
-- csv
-- xlsx
+Entregables:
 
----
+- Cliente Gemini detrás de un protocolo `AcademicAnalyzer`.
+- Flash como modelo base configurable.
+- Structured output validado con Pydantic.
+- Backoff, jitter, `Retry-After` y reparación de JSON.
+- Persistencia de cada análisis parcial.
+- Estado `WAITING_FOR_QUOTA`.
 
-# Milestone 4
+Finalizado cuando puede analizarse y reanudarse un conjunto de bloques mockeado y uno real.
 
-## Goal
+## Hito 7: consolidación jerárquica
 
-Services layer.
+Entregables:
 
-## Deliverables
+- Consolidación de bloques en secciones.
+- Consolidación de secciones en análisis final.
+- Pro opcional con fallback inmediato a Flash.
+- Deduplicación de conceptos dentro de la sesión.
+- Clasificación de evidencia e incertidumbre.
+- Reglas de recapitulación y granularidad.
 
-### Whisper Service
+Finalizado cuando Flash por sí solo produce un `AcademicAnalysis` válido y coherente.
 
-Input:
+## Hito 8: generación de Obsidian
 
-```text
-video.mp4
-```
+Entregables:
 
-Output:
+- Prompt académico derivado de `docs/AGENTS.md`.
+- Plantillas de materia, sesión y concepto.
+- Frontmatter YAML válido.
+- Enlaces Obsidian.
+- Escritura atómica en una carpeta de revisión.
+- Protección contra sobrescritura manual.
 
-```text
-transcript.txt
-transcript.vtt
-```
+Finalizado cuando el mismo análisis puede regenerar Markdown sin volver a llamar a Gemini.
 
-### Ollama Service
+## Hito 9: finalización segura
 
-Input:
+Entregables:
 
-```text
-transcript
-```
+- Verificación integral de artefactos.
+- Índice de sesiones procesadas.
+- Eliminación opcional del MP4 solo en `COMPLETED`.
+- Eliminación de audio temporal.
+- Resumen de ejecución y errores accionables.
 
-Output:
+Finalizado cuando ninguna ruta de fallo puede eliminar el video original.
 
-```text
-AcademicAnalysis
-```
+## Hito 10: prueba de aceptación
 
-### Deduplication Service
+Secuencia:
 
-- MD5
-- SequenceMatcher
+1. Procesar una muestra real de 20 a 30 minutos con diapositivas.
+2. Revisar precisión, terminología y estructura académica.
+3. Ajustar prompt y criterios de conceptos.
+4. Procesar una sesión completa de aproximadamente tres horas.
+5. Medir tiempo, uso de GPU, número de llamadas y capacidad de reanudación.
+6. Aprobar escritura directa al vault.
 
----
+## Definición de terminado
 
-# Milestone 5
-
-## Goal
-
-Processors.
-
-## Deliverables
-
-- MediaProcessor
-- PdfProcessor
-- TextProcessor
-- ExcelProcessor
-
-All processors must return:
-
-```python
-ProcessedContent
-```
-
----
-
-# Milestone 6
-
-## Goal
-
-Markdown and Vault generation.
-
-## Deliverables
-
-### Matter Note
-
-```markdown
-# Gestion de Riesgos
-```
-
-### Concept Notes
-
-```markdown
-# ISO 31010
-```
-
-### Class Notes
-
-```markdown
-# Clase 1
-```
-
----
-
-# Milestone 7
-
-## Goal
-
-Knowledge Graph.
-
-## Requirements
-
-Every concept note must generate:
-
-```markdown
-## Relacionado
-
-- [[Concepto A]]
-- [[Concepto B]]
-```
-
-Also store:
-
-```python
-Relation
-```
-
-objects.
-
----
-
-# Milestone 8
-
-## Goal
-
-Ingestion Pipeline.
-
-Flow:
-
-```text
-Video
-↓
-Whisper
-↓
-Transcript
-↓
-Ollama
-↓
-Concepts
-↓
-Markdown
-↓
-Vault
-```
-
----
-
-# Milestone 9
-
-## Goal
-
-CLI.
-
-Commands:
-
-```bash
-academic-vault init
-```
-
-```bash
-academic-vault process
-```
-
-```bash
-academic-vault ingest
-```
-
-```bash
-academic-vault transcribe
-```
-
-```bash
-academic-vault status
-```
-
-```bash
-academic-vault config
-```
-
----
-
-# Milestone 10
-
-## Goal
-
-Documentation and finalization.
-
-Requirements:
-
-- README complete
-- Architecture docs updated
-- CI passing
-- Coverage >= 70%
-
----
-
-# V1 Definition of Done
-
-The project is considered complete when:
-
-✅ Video transcription works
-
-✅ Ollama analysis works
-
-✅ Concepts are extracted
-
-✅ Concept notes are generated
-
-✅ Obsidian links are generated
-
-✅ Vault structure is generated
-
-✅ Deduplication works
-
-✅ Tests pass
-
-✅ Ruff passes
-
-✅ Mypy strict passes
-
-✅ CI pipeline passes
-
-✅ Documentation is updated
+- La sesión completa se procesa con Flash aunque Pro no tenga cuota.
+- La GTX 1650 se utiliza cuando es compatible y CPU funciona como fallback.
+- Una interrupción no repite bloques terminados.
+- Las diapositivas mejoran vocabulario sin convertirse en contenido hablado.
+- Se genera una nota útil por sesión.
+- Solo se crean conceptos independientes justificados.
+- No se sobrescribe contenido manual.
+- El video solo se elimina tras validación completa.
+- Ruff, mypy y pytest pasan con cobertura mínima de 70 %.

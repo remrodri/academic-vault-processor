@@ -182,6 +182,14 @@ Reglas:
 - Cada concepto debe enlazar materias, clases, tareas o evaluaciones relacionadas.
     
 - Si un concepto aparece en varias materias, se mantiene una sola nota conceptual y se agregan referencias cruzadas.
+
+- Una mención aislada no justifica una nota conceptual.
+
+- Crear una nota propia solo cuando el concepto tenga explicación suficiente, importancia académica y utilidad fuera de una frase concreta.
+
+- Como regla operativa, un concepto debe cumplir al menos dos de estos criterios: fue definido o explicado, ocupa una parte sustancial de la sesión, es un tema formal del material docente, aparece en varias sesiones, tiene ejemplos o aplicaciones, permite comprender otros conceptos o es claramente relevante para estudiar la materia.
+
+- Los conceptos secundarios deben permanecer dentro de la nota de sesión hasta reunir evidencia suficiente.
     
 
 Formato recomendado:
@@ -699,11 +707,13 @@ No inventar contenido académico.
 
 ---
 
-# Procesamiento de Clases
+# Procesamiento de Sesiones
 
-Cuando se procese una clase, grabación o transcripción:
+Una sesión es la unidad académica representada por un único video consolidado. La nota generada conserva `tipo: clase` por compatibilidad con la organización del vault.
 
-1. Crear nota de clase.
+Cuando se procese una sesión:
+
+1. Crear una nota de sesión.
     
 2. Generar resumen ejecutivo.
     
@@ -717,9 +727,21 @@ Cuando se procese una clase, grabación o transcripción:
     
 7. Enlazar conceptos existentes.
     
-8. Crear nuevos conceptos solo si hay evidencia suficiente.
+8. Crear nuevos conceptos solo si cumplen las reglas de granularidad de `02_Conceptos`.
     
 9. Registrar dudas o temas a reforzar.
+
+10. Separar explicaciones formales, ejemplos, experiencias del docente, actividades y comentarios incidentales.
+
+11. Si el docente recuerda contenido anterior, registrarlo como recapitulación en la sesión actual y enlazar la sesión anterior cuando pueda identificarse.
+
+12. Utilizar las diapositivas para corregir vocabulario y reconocer estructura, sin afirmar que su contenido fue explicado cuando no aparece en la transcripción.
+
+13. Distinguir contenido respaldado por la transcripción, contenido presente solo en material docente, inferencias e información incierta.
+
+14. No inferir ni guardar fechas límite a partir de expresiones relativas como “el próximo viernes”.
+
+Las experiencias del docente permanecen en la nota de sesión, salvo que constituyan un caso de estudio desarrollado y reutilizable.
     
 
 Formato recomendado:
@@ -743,6 +765,10 @@ tags:
 ## Conceptos
 
 ## Ejemplos del Docente
+
+## Experiencias del Docente
+
+## Recapitulación de la Sesión Anterior
 
 ## Posibles Preguntas de Examen
 
